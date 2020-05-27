@@ -1,0 +1,19 @@
+function y=AABBbox_check(end_eff,drone,L,W,H,E)
+
+e_min=[end_eff(1)-E/2 end_eff(2)-E/2 end_eff(3)-E/2];
+e_max=[end_eff(1)+E/2 end_eff(2)+E/2 end_eff(3)+E/2];
+
+d_min=[drone(1)-L/2 drone(2)-W/2 drone(3)-H/2];
+d_max=[drone(1)+L/2 drone(2)+W/2 drone(3)+H/2];
+
+if e_max(1)>=d_min(1) && e_min(1)<=d_max(1) && e_max(2)>=d_min(2) && e_min(2)<=d_max(2) && e_max(3)>=d_min(3) && e_min(3)<=d_max(3) 
+    
+    y=1;
+    
+else
+    
+    y=0;
+    
+end
+
+end
