@@ -1,0 +1,30 @@
+function F=frep(q_curr,q_obs,q_goal,rou_0,rou,p_compent,eta_1,n)
+
+% rou_1=norm(q_obs(1)-q_curr(1))-50-130/2-10;
+% rou_2=norm(q_obs(2)-q_curr(2))-50-130/2-10;
+% rou_3=norm(q_obs(3)-q_curr(3))-50-130/2-10;
+
+% rou=norm(q_obs-q_curr)-50-130/2-10;
+
+ 
+u_or=(q_curr-q_obs)/norm(q_curr-q_obs);
+u_rg=(q_goal-q_curr)/norm(q_curr-q_obs);
+
+frep1_x=eta_1*(1/p_compent(1)-1/rou_0)*(1/p_compent(1)^2)*  ((q_curr(1)-q_goal(1))^n);
+frep1_y=eta_1*(1/p_compent(2)-1/rou_0)*(1/p_compent(2)^2)*  ((q_curr(2)-q_goal(2))^n);
+frep1_z=eta_1*(1/p_compent(3)-1/rou_0)*(1/p_compent(3)^2)*  ((q_curr(3)-q_goal(3))^n);
+
+frep2_x=-(n/2) * eta_1 *(1/p_compent(1)-1/rou_0)^2 *  ((q_curr(1)-q_goal(1))^(n-1));
+frep2_y=-(n/2) * eta_1 *(1/p_compent(2)-1/rou_0)^2 *  ((q_curr(2)-q_goal(2))^(n-1));
+frep2_z=-(n/2) * eta_1 *(1/p_compent(3)-1/rou_0)^2 *  ((q_curr(3)-q_goal(3))^(n-1));
+
+if (rou>0)  && (rou<rou_0) || rou==rou_0
+    
+    F= [frep1_x*u_or(1)+frep2_x*u_rg(1) frep1_y*u_or(2)+frep2_y*u_rg(2)  frep1_z*u_or(3)+frep2_z*u_rg(3)];
+    
+elseif rou>rou_0
+    
+    F=0;
+else
+    F=0;
+end
