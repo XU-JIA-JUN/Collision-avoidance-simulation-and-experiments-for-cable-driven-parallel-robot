@@ -1,0 +1,41 @@
+function[point,distance,p_compent]=dispoint2linseg(Po1,S1,S2)
+
+% Po1 obstacle
+% S1  P fix point
+% S2  e moving point
+ds1=norm(S2-S1);
+AB=S2-S1;
+us=AB/ds1;
+AP=Po1-S1;
+AC=(dot(AP,AB)/norm(AB))*us;
+
+r=dot(AP,AB)/(norm(AB))^2;
+
+if r<0||r==0
+    
+distance=norm(Po1-S1);
+q=Po1-S1;
+p_compent=[abs(q(1)) abs(q(2)) abs(q(3))];
+
+point=S1;
+
+elseif r>1 || r==1
+    
+distance=norm(Po1-S2);
+q=Po1-S2;
+p_compent=[abs(q(1)) abs(q(2)) abs(q(3))];
+
+point=S2;
+
+else
+    
+ point=S1+AC;
+ 
+ distance=norm(Po1-point);
+ q=Po1-point;
+ p_compent=[abs(q(1)) abs(q(2)) abs(q(3))];
+
+end
+    
+ 
+   
