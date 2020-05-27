@@ -1,0 +1,137 @@
+  function [y,point,p_compent,distance,cable]=AABB_check(end_eff,drone,L,W,H,E)
+
+P1=[-437.082 524.3283 864.7443]';  
+P2=[439.7277 525.9461 860.8701]';                  
+P3=[-435.143 -521.906 839.1691]';        
+P4=[437.8987 -523.83 859.4645]';         
+P5=[-535.048 466.8895 79.72492]';        
+P6=[531.9962 451.4305 80.32775]';         
+P7=[-543.043 -463.811 71.49693]';         
+P8=[529.0567 -448.63 84.36402]';  
+PT=[P1'; P2'; P3'; P4'; P5'; P6'; P7'; P8'];
+e1=[-130/2,130/2,-130/2]';
+e2=[130/2,130/2,-130/2]';
+e3=[-130/2,-130/2,-130/2]';
+e4=[130/2,-130/2,-130/2]';
+e5=[-130/2,130/2,130/2]';
+e6=[130/2,130/2,130/2]';
+e7=[-130/2,-130/2,130/2]';
+e8=[130/2,-130/2,130/2]';
+ET=[e1'; e2' ;e3' ;e4' ;e5' ;e6' ;e7' ;e8'];
+
+x1=0;
+x2=0;
+x3=0;
+
+RA=[cos(x3)*cos(x2),-sin(x3)*cos(x1)+cos(x3)*sin(x2)*sin(x1),sin(x3)*sin(x1)+cos(x3)*sin(x2)*cos(x1);
+    cos(x2)*sin(x3),cos(x1)*cos(x3)+sin(x1)*sin(x2)*sin(x3),-cos(x3)*sin(x1)+cos(x1)*sin(x2)*sin(x3);
+    -sin(x2),cos(x2)*sin(x1),cos(x1)*cos(x2)];
+
+end_p1=(RA*e1+end_eff');
+end_p2=(RA*e2+end_eff');
+end_p3=(RA*e3+end_eff');
+end_p4=(RA*e4+end_eff');
+end_p5=(RA*e5+end_eff');
+end_p6=(RA*e6+end_eff');
+end_p7=(RA*e7+end_eff');
+end_p8=(RA*e8+end_eff');
+
+
+y0=AABBbox_check(end_eff,drone,L,W,H,E);
+y1=AABBsegment_check(P1',end_p1',drone,L,W,H);
+y2=AABBsegment_check(P2',end_p2',drone,L,W,H);
+y3=AABBsegment_check(P3',end_p3',drone,L,W,H);
+y4=AABBsegment_check(P4',end_p4',drone,L,W,H);
+y5=AABBsegment_check(P5',end_p5',drone,L,W,H);
+y6=AABBsegment_check(P6',end_p6',drone,L,W,H);
+y7=AABBsegment_check(P7',end_p7',drone,L,W,H);
+y8=AABBsegment_check(P8',end_p8',drone,L,W,H);
+
+if y0==1
+    
+    y=1;
+    cable=0;
+    point=end_eff;
+    distance=norm(drone-end_eff);
+    v=drone-end_eff;
+    p_compent=[abs(v(1)) abs(v(2)) abs(v(3)) ];
+    return
+    
+elseif y1==1
+    
+    y=1;
+    cable=1;
+    [point,distance,p_compent]=dispoint2linseg(drone,P1',end_p1');
+    return
+
+elseif y2==1
+    
+    y=1;
+    cable=2;
+    [point,distance,p_compent]=dispoint2linseg(drone,P2',end_p2');
+    return
+elseif y3==1
+
+    y=1;
+    cable=3;
+    [point,distance,p_compent]=dispoint2linseg(drone,P3',end_p3');
+    return
+    
+elseif y4==1
+
+    y=1;
+    cable=4;
+    [point,distance,p_compent]=dispoint2linseg(drone,P4',end_p4');
+    return
+ 
+elseif y5==1
+
+    y=1;
+    cable=5;
+    [point,distance,p_compent]=dispoint2linseg(drone,P5',end_p5');
+    return    
+    
+elseif y6==1
+
+    y=1;
+    cable=6;
+    [point,distance,p_compent]=dispoint2linseg(drone,P6',end_p6');
+    return
+    
+elseif y7==1
+
+    y=1;
+    cable=7;
+    [point,distance,p_compent]=dispoint2linseg(drone,P7',end_p7');
+    return
+ 
+elseif y8==1
+
+    y=1;
+    cable=8;
+    [point,distance,p_compent]=dispoint2linseg(drone,P8',end_p8');
+    return
+else
+    y=0;
+    point0=end_eff;
+    distance0=norm(drone-end_eff);
+    [point1,distance1,~]=dispoint2linseg(drone,P1',end_p1');
+    [point2,distance2,~]=dispoint2linseg(drone,P2',end_p2');
+    [point3,distance3,~]=dispoint2linseg(drone,P3',end_p3');
+    [point4,distance4,~]=dispoint2linseg(drone,P4',end_p4');
+    [point5,distance5,~]=dispoint2linseg(drone,P5',end_p5');
+    [point6,distance6,~]=dispoint2linseg(drone,P6',end_p6');
+    [point7,distance7,~]=dispoint2linseg(drone,P7',end_p7');
+    [point8,distance8,~]=dispoint2linseg(drone,P8',end_p8');
+    
+    point_arry=[point0;point1;point2;point3;point4;point5;point6;point7;point8];
+    [distance,indx]=min([distance0 distance1 distance2 distance3 distance4 distance5 distance6 distance7 distance8]);
+    point=point_arry(indx,:);
+    cable=indx-1;
+    
+    p_=drone-point;
+    p_compent=[abs(p_(1)) abs(p_(2)) abs(p_(3))];
+    
+end
+
+end
