@@ -1,0 +1,9 @@
+function F=fatt(q_curr,q_goal,v_curr,v_goal,a_curr,a_goal,ksi_q,ksi_v,ksi_a)
+
+fattq=2*ksi_q*norm(q_curr-q_goal)*( (q_goal-q_curr)/norm(q_goal-q_curr) );
+% fattv=2*ksi_v*norm(v_curr-v_goal)*( (v_goal-v_curr)/norm(v_goal-v_curr) );
+% fatta=2*ksi_a*norm(a_curr-a_goal)*( (a_goal-a_curr)/norm(a_goal-a_curr) );
+
+F=fattq;
+
+end
