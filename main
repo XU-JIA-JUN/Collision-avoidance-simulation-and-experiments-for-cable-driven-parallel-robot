@@ -1,0 +1,266 @@
+clear 
+close all
+clc
+clf
+
+P1=[-437.082 524.3283 864.7443]';  
+P2=[439.7277 525.9461 860.8701]';                  
+P3=[-435.143 -521.906 839.1691]';        
+P4=[437.8987 -523.83 859.4645]';         
+P5=[-535.048 466.8895 79.72492]';        
+P6=[531.9962 451.4305 80.32775]';         
+P7=[-543.043 -463.811 71.49693]';         
+P8=[529.0567 -448.63 84.36402]';  
+PT=[P1'; P2'; P3'; P4'; P5'; P6'; P7'; P8'];
+e1=[-130/2,130/2,-130/2]';
+e2=[130/2,130/2,-130/2]';
+e3=[-130/2,-130/2,-130/2]';
+e4=[130/2,-130/2,-130/2]';
+e5=[-130/2,130/2,130/2]';
+e6=[130/2,130/2,130/2]';
+e7=[-130/2,-130/2,130/2]';
+e8=[130/2,-130/2,130/2]';
+ET=[e1'; e2' ;e3' ;e4' ;e5' ;e6' ;e7' ;e8'];
+x1= -pi/180*0;
+x2=-pi/180*0;
+x3=pi/180*0;
+
+RA=[cos(x3)*cos(x2),-sin(x3)*cos(x1)+cos(x3)*sin(x2)*sin(x1),sin(x3)*sin(x1)+cos(x3)*sin(x2)*cos(x1);
+cos(x2)*sin(x3),cos(x1)*cos(x3)+sin(x1)*sin(x2)*sin(x3),-cos(x3)*sin(x1)+cos(x1)*sin(x2)*sin(x3);-sin(x2),cos(x2)*sin(x1),cos(x1)*cos(x2)];
+
+
+figure(1003)
+clf 
+h = gca; 
+axis([-600 600 -600 600 0 1000])
+set(gca,'nextplot','replacechildren','box','off','color','w','xgrid','off')
+hold on;
+kx=[P7(1) P8(1) P4(1) P3(1) P7(1) P3(1) P1(1) P5(1) P7(1) P5(1) P1(1) P2(1) P6(1) P8(1) P4(1) P2(1) P6(1) P6(1) P5(1)];
+ky=[P7(2) P8(2) P4(2) P3(2) P7(2) P3(2) P1(2) P5(2) P7(2) P5(2) P1(2) P2(2) P6(2) P8(2) P4(2) P2(2) P6(2) P6(2) P5(2)];
+kz=[P7(3) P8(3) P4(3) P3(3) P7(3) P3(3) P1(3) P5(3) P7(3) P5(3) P1(3) P2(3) P6(3) P8(3) P4(3) P2(3) P6(3) P6(3) P5(3)];
+plot3(kx,ky,kz,'r','linewidth',2);
+
+% text(P1(1),P1(2),P1(3),'P1')
+% text(P2(1),P2(2),P2(3),'P2')
+% text(P3(1),P3(2),P3(3),'P3')
+% text(P4(1),P4(2),P4(3),'P4')
+% text(P5(1),P5(2),P5(3),'P5')
+% text(P6(1),P6(2),P6(3),'P6')
+% text(P7(1),P7(2),P7(3),'P7')
+% text(P8(1),P8(2),P8(3),'P8')
+
+% title('RRT-moving-obstacle')
+
+Startpt.coord = [180,180,300];
+Startpt.parent = 0;
+Startpt.cost = 0;
+
+Goalpt.coord = [-180,-180,650];
+Goalpt.parent = 0;
+Goalpt.cost = 0;
+
+plot3(Startpt.coord(1),Startpt.coord(2),Startpt.coord(3),'.','markersize',24,'color',[1 0 1]) % start marker
+hold on 
+plot3(Goalpt.coord(1),Goalpt.coord(2),Goalpt.coord(3),'.g','markersize',24,'color',[0 0.8 0]) % goal marker
+hold on
+
+% ostartpt=[-Goalpt.coord(1) -Goalpt.coord(2)  Goalpt.coord(3)];
+% ogoalpt =[-Startpt.coord(1) -Startpt.coord(2) Startpt.coord(3)];
+
+ostartpt=[Goalpt.coord(1) Goalpt.coord(2)  Goalpt.coord(3)];
+ogoalpt =[Startpt.coord(1) Startpt.coord(2) Startpt.coord(3)];
+
+ot=100;  %time
+dis_t=0.5; %discreate time
+paus_t=0.5;%pause time
+step = 40;
+
+obspz=[];
+endpz=[];
+check=[];
+tree=[];
+treck=[];
+inx_treck=[];
+Atreck=[];
+NG=[];
+NE=[];
+C_point=[];
+L=158;
+W=158;
+H=50;
+E=158;
+
+L_=L+30;
+W_=W+30;
+H_=H+30;
+
+cr=150;
+
+for i=0:dis_t:15   % compute obstacle posion with time 15s
+
+   ox=ogoalpt(1)-((ogoalpt(1)-ostartpt(1))/10)*i;
+   oy=ogoalpt(2)-((ogoalpt(2)-ostartpt(2))/10)*i;
+   oz=ogoalpt(3)-((ogoalpt(3)-ostartpt(3))/10)*i;
+   obspz=[obspz; ox oy oz];
+end
+
+[is_free,~,~,~,~]=AABB_check(Startpt.coord,obspz(1,:),L,W,H,E); % check start point
+
+
+if is_free==0
+    disp('startpoint is ok')
+    else
+    disp('startpoint is not ok')
+end
+
+Nodes(1) = Startpt;
+count = 1;
+
+while norm(Nodes(count).coord-Goalpt.coord)>40 
+    
+%     if count<length(obspz) 
+        
+        Fatt=fatt(Nodes(count).coord,Goalpt.coord,0,0,0,0,20,0,0);     % direction attact
+        NewNode=Nodes(count).coord+step* ( Fatt/(norm(Fatt)) );      
+        
+        if count+1<= length(obspz) % if obstacle disapper
+        [is_free,point,distance,cable]=AABB_check(NewNode,obspz(count+1,:),L,W,H,E);
+        if is_free==1
+            C_point=[C_point;NewNode-step* ( Fatt/(norm(Fatt))) obspz(count,:)  NewNode+step* ( Fatt/(norm(Fatt)) )];
+        end
+        
+        else
+         is_free=0;
+        end
+        
+        if is_free==0
+            
+           NewNode=Nodes(count).coord+step* ( Fatt/(norm(Fatt)) );
+           
+        else
+            a=rand(1);
+            if a<1
+                
+                [is_free,point,p_compent,distance,cable]=AABB_check(NewNode,obspz(count+1,:),L,W,H,E);
+                
+                while is_free~=0 || (NewNode(1)<-180 || NewNode(1)>180 || NewNode(2)<-180 || NewNode(2)>180 || NewNode(3)>700||NewNode(3)<100)
+                    
+                            ra=cr*rand(1);
+                            fai=2*pi*rand(1);
+                            sita=pi*rand(1);
+                            RandNode =[ra*sin(sita)*cos(fai) ra*sin(sita)*sin(fai) ra*cos(fai)];
+                            NewNode = Nodes(count).coord + RandNode;
+                            [is_free,point,p_compent,distance,cable]=AABB_check(NewNode,obspz(count+1,:),L,W,H,E);
+                    
+                end
+                
+            else
+                [is_free,point,p_compent,distance,cable]=AABB_check(NewNode,obspz(count+1,:),L,W,H,E);
+                Frep= frep(point,obspz(count+1,:),Goalpt.coord,120,distance,p_compent,1000000000,2);
+               
+                Ftot=Fatt+Frep;
+                NewNode=Nodes(count).coord+step* ( Ftot/(norm(Ftot)) );
+             
+            end
+            
+        end
+            
+             Newpt.coord = NewNode;
+             Newpt.parent = Nodes(count).parent+1;
+             Newpt.cost =  Nodes(count).cost+ step;
+             Nodes = [Nodes Newpt];
+             
+              figure(1003)
+              view(-104,32)
+              plot3([Nodes(count).coord(1) Nodes(count+1).coord(1)] ,[Nodes(count).coord(2) Nodes(count+1).coord(2)],[Nodes(count).coord(3) Nodes(count+1).coord(3)],'.g','markersize',24,'color','k')
+              plot3([Nodes(count).coord(1) Nodes(count+1).coord(1)] ,[Nodes(count).coord(2) Nodes(count+1).coord(2)],[Nodes(count).coord(3) Nodes(count+1).coord(3)],'LineStyle','--','color','b','LineWidth',10)
+             
+              if count+1<= length(obspz)
+              [h,cab1,cab2,cab3,cab4,cab5,cab6,cab7,cab8,cube]=eoplot(Newpt.coord,obspz(count+1,:),L,W,H);
+              else
+              [h,cab1,cab2,cab3,cab4,cab5,cab6,cab7,cab8,cube]=eoplot(Newpt.coord,[1000 1000 1000],L,W,H);
+              end
+              
+%               t_new=text(Newpt.coord(1),Newpt.coord(2),Newpt.coord(3),num2str(Newpt.coord));
+      
+      E1=[Newpt.coord(1)-E/2 Newpt.coord(2)-E/2 Newpt.coord(3)+E/2];
+      E2=[Newpt.coord(1)-E/2 Newpt.coord(2)+E/2 Newpt.coord(3)+E/2];
+      E3=[Newpt.coord(1)+E/2 Newpt.coord(2)-E/2 Newpt.coord(3)+E/2];
+      E4=[Newpt.coord(1)+E/2 Newpt.coord(2)+E/2 Newpt.coord(3)+E/2];
+      E5=[Newpt.coord(1)-E/2 Newpt.coord(2)-E/2 Newpt.coord(3)-E/2];
+      E6=[Newpt.coord(1)-E/2 Newpt.coord(2)+E/2 Newpt.coord(3)-E/2];
+      E7=[Newpt.coord(1)+E/2 Newpt.coord(2)-E/2 Newpt.coord(3)-E/2];
+      E8=[Newpt.coord(1)+E/2 Newpt.coord(2)+E/2 Newpt.coord(3)-E/2];
+      ET=[E1;E2;E3;E4;E5;E6;E7;E8];
+      
+      box_e=[Newpt.coord(1)-E/2 Newpt.coord(1)+E/2 Newpt.coord(2)-E/2 Newpt.coord(2)+E/2 Newpt.coord(3)-E/2 Newpt.coord(3)+E/2];
+%       d_box_e=drawBox3d(box_e);
+      
+%       h_min_eorcable=plot3(point(1),point(2),point(3),'Marker','o','MarkerSize',10);
+%       line_min_eo=plot3([p_min_e(1) p_min_o(1)],[p_min_e(2) p_min_o(2)],[p_min_e(3) p_min_o(3)],'LineStyle','--');
+      count=count+1;
+       pause(paus_t)          
+            
+     delete(h)
+     delete(cab1)
+     delete(cab2)
+     delete(cab3)
+     delete(cab4)
+     delete(cab5)
+     delete(cab6)
+     delete(cab7)
+     delete(cab8)
+     delete(cube)
+     %delete(h_min_eorcable)
+%      delete(line_min_eo)
+    % delete(d_box_e)
+    % delete(t_new)   
+%            drawnow
+end   
+     
+
+EM=[];
+for i=1:length(Nodes)
+EM=[EM;getfield(Nodes(i),'coord')];
+end
+
+OM=obspz;
+ipa=[];
+ip=-0.5;
+for i=1:1:length(EM)
+ip=ip+dis_t;
+ipa=[ipa;ip];
+end
+    ce1=(RA*e1+Nodes(count).coord');
+    ce2=(RA*e2+Nodes(count).coord');
+    ce3=(RA*e3+Nodes(count).coord');
+    ce4=(RA*e4+Nodes(count).coord');
+    ce5=(RA*e5+Nodes(count).coord');
+    ce6=(RA*e6+Nodes(count).coord');
+    ce7=(RA*e7+Nodes(count).coord');
+    ce8=(RA*e8+Nodes(count).coord');
+    
+for i=1:length(EM)
+    d0=norm(obspz(i,:)-EM(i,:));
+    
+    [~,d1,~]=dispoint2linseg(obspz(i,:),P1',(RA*e1+EM(i,:)')');
+    [~,d2,~]=dispoint2linseg(obspz(i,:),P2',(RA*e2+EM(i,:)')');
+    [~,d3,~]=dispoint2linseg(obspz(i,:),P3',(RA*e3+EM(i,:)')');
+    [~,d4,~]=dispoint2linseg(obspz(i,:),P4',(RA*e4+EM(i,:)')');
+    [~,d5,~]=dispoint2linseg(obspz(i,:),P5',(RA*e5+EM(i,:)')');
+    [~,d6,~]=dispoint2linseg(obspz(i,:),P6',(RA*e6+EM(i,:)')');
+    [~,d7,~]=dispoint2linseg(obspz(i,:),P7',(RA*e7+EM(i,:)')');
+    [~,d8,~]=dispoint2linseg(obspz(i,:),P8',(RA*e8+EM(i,:)')');
+    D(i,:)=[d0 d1 d2 d3 d4 d5 d6 d7 d8];
+    
+end
+% t=[0:0.5:15]';
+figure(1)
+plot(ipa,D(:,1),'k',ipa,D(:,2)','g',ipa,D(:,3),'b',ipa,D(:,4)','r',ipa,D(:,5),'k--o',ipa,D(:,6),'g--*',ipa,D(:,7),'b--',ipa,D(:,8)','r--',ipa,D(:,9)','y')
+
+xlabel('Time[s]')
+ylabel('Distance[mm]')
+h1=legend('End-effector','Cable1','Cable2','Cable3','Cable4','Cable5','Cable6','Cable7','Cable8');
+set(h1,'box','off')
+
+%img1_=insertText(img2,[bbox1(1)+bbox1(3)/2 bbox1(2) + (bbox1(4)/2)],strcat('X: ', num2str(round(137)),'    Y: ', num2str(round((84))), '    Z: ', num2str(round((565)))),'TextColor','yellow','Font', 'Arial','FontSize', 12);
