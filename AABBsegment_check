@@ -1,0 +1,131 @@
+  function y=AABBsegment_check(start_p,end_p,drone,L,W,H)
+
+
+d_min=[drone(1)-L/2 drone(2)-W/2 drone(3)-H/2];
+d_max=[drone(1)+L/2 drone(2)+W/2 drone(3)+H/2];
+
+length=norm(end_p-start_p);
+dir=(end_p-start_p)/length;
+
+if d_min(1)<=end_p(1) && end_p(1)<=d_max(1) && d_min(2)<=end_p(2) && end_p(2)<=d_max(2) && d_min(3)<=end_p(3) && end_p(3)<=d_max(3)
+    
+    y=1;
+    return
+end
+    
+    
+
+if dir(1)~=0
+    
+if dir(1)>0
+    
+    t=(d_min(1)-start_p(1))/dir(1);
+else
+    
+    t=(d_max(1)-start_p(1))/dir(1);
+    
+end
+
+if t>0
+    
+    pt_plane=start_p+t*dir;
+    length_p=norm(pt_plane-start_p);
+    
+    if length_p<=length && d_min(2)<=pt_plane(2) && pt_plane(2)<=d_max(2) && d_min(3)<=pt_plane(3) && pt_plane(3)<=d_max(3)
+        
+        y=1;
+        return
+    else
+        
+        y=0;
+    end
+    
+else
+    y=0;
+    
+    return
+    
+end
+
+
+end
+
+
+
+if dir(2)~=0
+    
+if dir(2)>0
+    
+    t=(d_min(2)-start_p(2))/dir(2);
+else
+    
+    t=(d_max(2)-start_p(2))/dir(2);
+    
+end
+
+if t>0
+    
+    pt_plane=start_p+t*dir;
+    length_p=norm(pt_plane-start_p);
+    
+    if length_p<=length && d_min(3)<=pt_plane(3) && pt_plane(3)<=d_max(3) && d_min(1)<=pt_plane(1) && pt_plane(1)<=d_max(1)
+        
+        y=1;
+        return
+    else
+        
+        y=0;
+    end
+    
+else
+    
+    y=0;
+    return
+end
+
+end
+
+
+
+if dir(3)~=0
+    
+if dir(3)>0
+    
+    t=(d_min(3)-start_p(3))/dir(3);
+else
+    
+    t=(d_max(3)-start_p(3))/dir(3);
+    
+end
+
+if t>0
+    
+    pt_plane=start_p+t*dir;
+    length_p=norm(pt_plane-start_p);
+    
+    if length_p<=length && d_min(1)<=pt_plane(1) && pt_plane(1)<=d_max(1) && d_min(2)<=pt_plane(2) && pt_plane(2)<=d_max(2)
+        
+        y=1;
+        return
+    else
+        
+        y=0;
+    end
+else
+    
+    y=0;
+    return
+end
+
+end
+
+ end
+        
+
+% line([start_p(1) end_p(1)],[start_p(2) end_p(2)],[start_p(3) end_p(3)])
+% hold on
+% drawCuboid([drone L W H])
+
+    
+
+
